@@ -1,11 +1,12 @@
 # CrewAI Web Screenshot Agent
 
-This project is a command-line tool that uses CrewAI and Selenium to take screenshots of websites and save them to your desktop. The agent is orchestrated by CrewAI and requires an OpenAI API key for operation.
+This project is a command-line tool that uses CrewAI and Selenium to take screenshots of websites and save them to your desktop and Google Drive. The agent is orchestrated by CrewAI and requires an OpenAI API key for operation.
 
 ## Features
 
 - Takes screenshots of any website you specify.
 - Saves screenshots to your desktop with a timestamped filename.
+- Saves screenshot to ur google drive
 - Command-line interface for easy use.
 
 ## Requirements
@@ -14,6 +15,7 @@ This project is a command-line tool that uses CrewAI and Selenium to take screen
 - Google Chrome browser installed
 - ChromeDriver (automatically managed)
 - OpenAI API key with available quota
+- google drive api
 
 ## Installation
 
@@ -45,7 +47,7 @@ CrewAI Web Screenshot Agent
 Enter a website URL to screenshot (or type 'exit' to quit):
 ```
 - Enter the URL of the website you want to screenshot (e.g., `youtube.com`).
-- The screenshot will be saved to your desktop.
+- The screenshot will be saved to your desktop and drive.
 - Type `exit` to quit.
 
 ## Troubleshooting
