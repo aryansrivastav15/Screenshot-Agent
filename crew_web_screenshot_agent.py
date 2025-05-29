@@ -8,11 +8,40 @@ from rich.console import Console
 from rich.prompt import Prompt
 from datetime import datetime
 from crewai import Agent, Task, Crew
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+import pickle
+from PIL import Image
 
 # Load environment variables
 load_dotenv()
 
 console = Console()
+
+def upload_to_drive(filepath, filename):
+    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+    creds = None
+    # Use absolute path for credentials.json
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    credentials_path = os.path.join(script_dir, 'credentials.json')
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open('token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+    service = build('drive', 'v3', credentials=creds)
+    file_metadata = {'name': filename}
+    media = MediaFileUpload(filepath, mimetype='image/png')
+    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    return file.get('id')
 
 def take_website_screenshot(url: str) -> str:
     save_dir = os.path.join(os.path.expanduser("~"), "Desktop")
@@ -34,8 +63,11 @@ def take_website_screenshot(url: str) -> str:
         filename = f"crew_web_screenshot_{timestamp}.png"
         filepath = os.path.join(save_dir, filename)
         driver.save_screenshot(filepath)
-        console.print(f"[green]Screenshot saved: {filepath}[/green]")
-        return filepath
+        console.print(f"[green]Screenshot saved locally: {filepath}[/green]")
+        # Upload to Google Drive
+        file_id = upload_to_drive(filepath, filename)
+        console.print(f"[cyan]Screenshot uploaded to Google Drive with file ID: {file_id}[/cyan]")
+        return f"Google Drive file ID: {file_id}"
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         return f"Error: {e}"
